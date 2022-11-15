@@ -6,7 +6,6 @@ import sys
 import yaml
 from torch.utils.data import Dataset
 import numpy as np
-from models import vit_model
 from tqdm import tqdm
 import pandas as pd
 import glob

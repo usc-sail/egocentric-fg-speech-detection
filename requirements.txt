@@ -1,6 +1,7 @@
 vit-pytorch
 pandas
 scikit-learn
+PySoundFile
 torchaudio
 pyyaml
 tqdm

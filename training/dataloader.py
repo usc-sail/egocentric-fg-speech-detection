@@ -1,14 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 6/19/21 12:23 AM
-# @Author  : Yuan Gong
-# @Affiliation  : Massachusetts Institute of Technology
-# @Email   : yuangong@mit.edu
-# @File    : dataloader.py
-
-# modified from:
-# Author: David Harwath
-# with some functions borrowed from https://github.com/SeanNaren/deepspeech.pytorch
-
 import csv
 import json
 import torchaudio

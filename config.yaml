@@ -1,0 +1,9 @@
+data:
+  num_mel_bins: 128
+  sample_frequency: 16000
+  spec_mean: -7.625
+  spec_std: 2.36
+  target_length: 3072
+  num_workers: 16
+model:
+  pretrained_path: /data/rajatheb/ears/v2/pretrained_models/vit-small.pt

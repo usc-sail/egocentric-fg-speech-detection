@@ -6,4 +6,5 @@ data:
   target_length: 3072
   num_workers: 16
 model:
+  batch_size: 32
   pretrained_path: /data/rajatheb/ears/v2/pretrained_models/vit-small.pt

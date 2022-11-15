@@ -95,8 +95,10 @@ if __name__ == '__main__':
     ## Create Dataloader
     dataloader = torch.utils.data.DataLoader(FGDataset(audio_paths, config['data']), batch_size=config['model']['batch_size'], shuffle=False, num_workers=config['data']['num_workers'], pin_memory=True)
     
-    ## Define and load model 
+    ## Define and load model
     audio_model = torch.load(config['model']['pretrained_path'], map_location=device)
+    if device.type == 'cpu':
+        audio_model = audio_model.module
     
     ## Run inference
     inference(dataloader, audio_model, args.out_file, device)

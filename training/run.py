@@ -10,7 +10,6 @@ sys.path.append(basepath)
 import dataloader
 import numpy as np
 from traintest import train, validate
-sys.path.append('../')
 from models import vit_model
 
 print("I am process %s, running on %s: starting (%s)" % (os.getpid(), os.uname()[1], time.asctime()))

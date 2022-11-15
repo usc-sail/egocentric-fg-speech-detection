@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 6/11/21 12:57 AM
-# @Author  : Yuan Gong
-# @Affiliation  : Massachusetts Institute of Technology
-# @Email   : yuangong@mit.edu
-# @File    : run.py
-
 import argparse
 import os
 import ast

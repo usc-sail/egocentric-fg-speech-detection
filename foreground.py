@@ -9,6 +9,7 @@ import numpy as np
 from models import vit_model
 from tqdm import tqdm
 import pandas as pd
+import glob
 
 def get_file_paths(ap):
     if os.path.isfile(ap):
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     usage_example = '''example usage:
         python foreground.py wav_files.txt results.csv
         python foreground.py /path/to/wav/files/ results.csv
-        python foreground.py --config config.yaml /path/to/wav/files/ results.csv'''
+        python foreground.py --config config.yaml /path/to/wav/directory/ results.csv'''
                  
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="Foreground-Speech Detection", epilog=usage_example)
     parser.add_argument("audio_paths", type=str, help='text-file containing complete paths to audio-files on each line OR directory containing audio-files')

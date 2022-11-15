@@ -1,0 +1,6 @@
+vit-pytorch
+pandas
+scikit-learn
+torchaudio
+pyyaml
+tqdm

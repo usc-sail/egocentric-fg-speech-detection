@@ -187,7 +187,7 @@ def train(audio_model, train_loader, test_loader, args):
 
         if best_epoch == epoch:
             torch.save(audio_model.state_dict(), "%s/models/best_audio_model.pth" % (exp_dir))
-#            torch.save(optimizer.state_dict(), "%s/models/best_optim_state.pth" % (exp_dir))
+            torch.save(audio_model, "%s/models/best_audio_model.pt" % (exp_dir))
 
 
         scheduler.step()

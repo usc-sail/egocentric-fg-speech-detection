@@ -60,6 +60,7 @@ class FGDataset(Dataset):
 
 
 def inference(dataloader, model, outfile, device):
+    smax = torch.nn.Softmax(dim=1)
     model.eval()
     out_data = []
 
@@ -67,9 +68,9 @@ def inference(dataloader, model, outfile, device):
         for audio_file, audio_input in tqdm(dataloader):
             audio_input = audio_input.to(device)
             audio_output = audio_model(audio_input)
-            audio_output = torch.sigmoid(audio_output)
-            posterior = audio_output[:, 1].to('cpu').detach().numpy()
-            label = torch.argmax(audio_output, dim=1).to('cpu').detach().numpy()
+            audio_output_smax = smax(audio_output)
+            posterior = audio_output_smax[:, 1].cpu().numpy()
+            label = torch.argmax(audio_output_smax, dim=1).cpu().numpy()
             out_data.extend(list(zip(audio_file, posterior, label)))
     
     out_data = pd.DataFrame(out_data, columns=['filename', 'posterior', 'label'])

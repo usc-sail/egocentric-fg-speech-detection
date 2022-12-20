@@ -49,3 +49,11 @@ example usage:
         python foreground.py --config config.yaml /path/to/wav/files/ results.csv
         
 ```
+
+### Model comparison
+| Name | Training Dataset | AUC | F1 Score | 
+| --- | --- | --- | --- |
+| ```LogMel (Hebbar et al.)``` | DSE | 0.8 | 0.72 |
+| ```SAD emb (Hebbar et al.)``` | DSE | 0.87 | 0.82 |
+| vit-small | DSE | 0.88 | 0.66 |
+| vit-small-f128-t6 | DSE+Aging | 0.84 | 0.76 |  

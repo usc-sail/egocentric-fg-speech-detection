@@ -23,6 +23,8 @@ parser.add_argument('--dataset-std', type=float)
 parser.add_argument('--freqm', type=int)
 parser.add_argument('--timem', type=int)
 
+parser.add_argument('--patch_freq', type=int)
+parser.add_argument('--patch_time', type=int)
 
 parser.add_argument("--label-csv", type=str, default='', help="csv with class labels")
 parser.add_argument("--n_class", type=int, default=10, help="number of classes")
@@ -42,7 +44,6 @@ parser.add_argument("--n-print-steps", type=int, default=50, help="number of ste
 parser.add_argument('--save_model', help='save the model or not', type=ast.literal_eval)
 
 args = parser.parse_args()
-args.loss_fn = torch.nn.CrossEntropyLoss()
 audio_conf = {'num_mel_bins':128, 'target_length':3072, 'mean':args.dataset_mean, 'std':args.dataset_std, 'freqm':args.freqm, 'timem':args.timem}
 print("audio_conf", audio_conf)
 # transformer based model
@@ -54,7 +55,7 @@ val_loader = torch.utils.data.DataLoader(
         dataloader.Dataset(args.data_val, audio_conf, label_csv=args.label_csv),
         batch_size=args.batch_size*2, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 
-audio_model = vit_model(inp_dim=(128, 3072), patch_size=(16, 48), n_class=args.n_class, model_type=args.model_type, model_size=args.model_size)
+audio_model = vit_model(inp_dim=(128, 3072), patch_size=(args.patch_freq, args.patch_time), n_class=args.n_class, model_type=args.model_type, model_size=args.model_size)
 audio_model = torch.nn.DataParallel(audio_model)
 #print("\nCreating experiment directory: %s" % args.exp_dir)
 #os.makedirs("%s/models" % args.exp_dir)
@@ -62,7 +63,7 @@ with open("%s/args.pkl" % args.exp_dir, "wb") as f:
     pickle.dump(args, f)
 
 print('Now starting training for {:d} epochs'.format(args.n_epochs))
-#train(audio_model, train_loader, val_loader, args)
+train(audio_model, train_loader, val_loader, args)
 
 # evaluate the best model on validation set on the test set
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -72,28 +73,36 @@ audio_model.load_state_dict(sd)
 # best model on the validation set
 stats, _ = validate(audio_model, val_loader, args, 'valid_set')
 # note it is NOT mean of class-wise accuracy
-val_acc = stats[0]['acc']
-val_mAUC = np.mean([stat['auc'] for stat in stats])
-val_mAP = np.mean([stat['AP'] for stat in stats])
+val_acc = stats['acc']
+val_auc = stats['auc']
+val_prec = stats['precision']
+val_rec = stats['recall']
+val_f1 = stats['f1']
 print('---------------evaluate on the validation set---------------')
 print("Accuracy: {:.6f}".format(val_acc))
-print("AUC: {:.6f}".format(val_mAUC))
-print("mAP: {:.6f}".format(val_mAP))
+print("AUC: {:.6f}".format(val_auc))
+print("Precision: {:.6f}".format(val_prec))
+print("Recall: {:.6f}".format(val_rec))
+print("F1-score: {:.6f}".format(val_f1))
 
 # test the model on the evaluation set
 eval_loader = torch.utils.data.DataLoader(
     dataloader.Dataset(args.data_eval, audio_conf, label_csv=args.label_csv),
     batch_size=args.batch_size*2, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 stats, _ = validate(audio_model, eval_loader, args, 'eval_set')
-eval_acc = stats[0]['acc']
-eval_mAUC = np.mean([stat['auc'] for stat in stats])
-eval_mAP = np.mean([stat['AP'] for stat in stats])
+eval_acc = stats['acc']
+eval_auc = stats['auc']
+eval_prec = stats['precision']
+eval_rec = stats['recall']
+eval_f1 = stats['f1']
 print('---------------evaluate on the test set---------------')
 print("Accuracy: {:.6f}".format(eval_acc))
-print("AUC: {:.6f}".format(eval_mAUC))
-print("mAP: {:.6f}".format(eval_mAP))
+print("AUC: {:.6f}".format(eval_auc))
+print("Precision: {:.6f}".format(eval_prec))
+print("Recall: {:.6f}".format(eval_rec))
+print("F1-score: {:.6f}".format(eval_f1))
 with open("%s/test_stats_final.pkl" %args.exp_dir, "wb") as f:
     pickle.dump(stats, f)
-np.savetxt(args.exp_dir + '/eval_result.csv', [val_acc, val_mAUC, eval_acc, eval_mAUC])
+np.savetxt(args.exp_dir + '/eval_result.csv', [val_acc, val_auc, val_f1, eval_acc, eval_auc, eval_f1])
 
 

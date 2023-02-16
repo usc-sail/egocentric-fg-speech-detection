@@ -37,25 +37,29 @@ class FGDataset(Dataset):
 
     def __getitem__(self, index):
         fileid = os.path.basename(self.data[index]).split('.wav')[0]
-        waveform, sr = torchaudio.load(self.data[index])
-        if sr != self.sample_rate:
-            transform = torchaudio.transforms.Resample(sr, self.sample_rate)
-            waveform = transform(waveform)
+        try:
+            waveform, sr = torchaudio.load(self.data[index])
+            if sr != self.sample_rate:
+                transform = torchaudio.transforms.Resample(sr, self.sample_rate)
+                waveform = transform(waveform)
 
-        waveform = waveform - waveform.mean()
-        fbank = torchaudio.compliance.kaldi.fbank(waveform, htk_compat=True, sample_frequency=self.sample_rate, use_energy=False,
+            waveform = waveform - waveform.mean()
+            fbank = torchaudio.compliance.kaldi.fbank(waveform, htk_compat=True, sample_frequency=self.sample_rate, use_energy=False,
                                                     window_type='hanning', num_mel_bins=self.melbins, dither=0.0, frame_shift=10)
 
-        p = self.target_length - fbank.shape[0]
-        if p>0:
-            m = torch.nn.ZeroPad2d((0, 0, 0, p))
-            fbank = m(fbank)
-        elif p<0:
-            start_id = np.random.randint(0, -p)
-            fbank = fbank[start_id: start_id+self.target_length, :]
+            p = self.target_length - fbank.shape[0]
+            if p>0:
+                m = torch.nn.ZeroPad2d((0, 0, 0, p))
+                fbank = m(fbank)
+            elif p<0:
+                start_id = np.random.randint(0, -p)
+                fbank = fbank[start_id: start_id+self.target_length, :]
         
-        fbank = (fbank-self.norm_mean)/(self.norm_std*2)
-        fbank = torch.transpose(fbank, 0, 1).unsqueeze(0)
+            fbank = (fbank-self.norm_mean)/(self.norm_std*2)
+            fbank = torch.transpose(fbank, 0, 1).unsqueeze(0)
+        except:
+            fileid = "corrupted"
+            fbank = torch.zeros(1, self.melbins, self.target_length)
         return fileid, fbank
 
 
@@ -66,6 +70,9 @@ def inference(dataloader, model, outfile, device):
 
     with torch.no_grad():
         for audio_file, audio_input in tqdm(dataloader):
+            mask_idx = [i for i in range(len(audio_file)) if audio_file[i]!='corrupted']
+            audio_file = [audio_file[i] for i in mask_idx]
+            audio_input = audio_input[mask_idx]
             audio_input = audio_input.to(device)
             audio_output = audio_model(audio_input)
             audio_output_smax = smax(audio_output)

@@ -37,6 +37,7 @@ class FGDataset(Dataset):
 
     def __getitem__(self, index):
         fileid = os.path.basename(self.data[index]).split('.wav')[0]
+        ## Added try-catch block to handle errors in loading audio/extracting features that might arise 
         try:
             waveform, sr = torchaudio.load(self.data[index])
             if sr != self.sample_rate:
